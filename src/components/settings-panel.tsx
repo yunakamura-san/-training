@@ -144,6 +144,16 @@ export function SettingsPanel() {
           {saved ? <Check data-icon="inline-start" /> : <Save data-icon="inline-start" />}
           {saved ? "保存しました" : "設定を保存"}
         </Button>
+        {saved && (
+          <p
+            role="status"
+            aria-live="polite"
+            className="flex items-center gap-2 rounded-xl bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800"
+          >
+            <Check className="size-4" />
+            この端末に設定を保存しました。
+          </p>
+        )}
       </div>
 
       <div className="space-y-5">
