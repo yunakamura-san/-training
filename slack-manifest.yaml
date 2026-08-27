@@ -1,0 +1,23 @@
+display_information:
+  name: Thinktrain
+  description: 毎日15分、構造化思考を鍛えるパーソナルトレーナー
+  background_color: "#2f5d50"
+features:
+  bot_user:
+    display_name: Thinktrain
+    always_online: false
+oauth_config:
+  scopes:
+    bot:
+      - chat:write
+      - im:history
+      - reactions:write
+settings:
+  event_subscriptions:
+    bot_events:
+      - message.im
+  interactivity:
+    is_enabled: true
+  org_deploy_enabled: false
+  socket_mode_enabled: true
+  token_rotation_enabled: false
