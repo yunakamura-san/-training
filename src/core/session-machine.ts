@@ -9,7 +9,8 @@ export type SessionEvent =
   | { type: "APPEND"; text: string; at?: Date }
   | { type: "CONFIRM"; at?: Date }
   | { type: "INTERRUPT"; at?: Date }
-  | { type: "RESUME"; at?: Date };
+  | { type: "RESUME"; at?: Date }
+  | { type: "ABANDON"; at?: Date };
 
 export function createSession(input: {
   userId: string;
@@ -46,6 +47,17 @@ export function transition(
   if (event.type === "RESUME") {
     requireStatus(session, "interrupted");
     return { ...session, status: "active", updatedAt: at };
+  }
+  if (event.type === "ABANDON") {
+    if (session.status !== "active" && session.status !== "interrupted") {
+      throw new Error(`Cannot abandon ${session.status} session`);
+    }
+    return {
+      ...session,
+      status: "abandoned",
+      completedAt: at,
+      updatedAt: at,
+    };
   }
 
   requireStatus(session, "active");

@@ -58,7 +58,10 @@ export class InMemoryRepository implements Repository {
 
   async getOpenSession(userId: string): Promise<TrainingSession | null> {
     const open = [...this.sessions.values()]
-      .filter(({ userId: owner, status }) => owner === userId && status !== "completed")
+      .filter(
+        ({ userId: owner, status }) =>
+          owner === userId && (status === "active" || status === "interrupted"),
+      )
       .sort((a, b) => b.updatedAt.getTime() - a.updatedAt.getTime())[0];
     return structuredClone(open ?? null);
   }

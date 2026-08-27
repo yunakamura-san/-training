@@ -53,4 +53,17 @@ describe("session state machine", () => {
       transition(session, { type: "APPEND", text: "a".repeat(4_001) }),
     ).toThrow();
   });
+
+  it("can abandon an active or interrupted session without counting it complete", () => {
+    const session = createSession({
+      id: "11111111-1111-4111-8111-111111111111",
+      userId: "U1",
+      channelId: "D1",
+      caseId: "case-1",
+    });
+    const abandoned = transition(session, { type: "ABANDON" });
+    expect(abandoned.status).toBe("abandoned");
+    expect(abandoned.completedAt).toBeInstanceOf(Date);
+    expect(() => transition(abandoned, { type: "RESUME" })).toThrow();
+  });
 });

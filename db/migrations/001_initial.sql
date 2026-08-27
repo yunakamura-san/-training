@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS training_sessions (
   user_id text NOT NULL,
   channel_id text NOT NULL,
   case_id text NOT NULL REFERENCES training_cases(id),
-  status text NOT NULL CHECK (status IN ('active', 'interrupted', 'completed')),
+  status text NOT NULL CHECK (status IN ('active', 'interrupted', 'completed', 'abandoned')),
   current_step smallint NOT NULL CHECK (current_step BETWEEN 0 AND 7),
   answers jsonb NOT NULL DEFAULT '[]'::jsonb,
   started_at timestamptz NOT NULL,

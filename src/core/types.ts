@@ -44,6 +44,7 @@ export const SessionStatusSchema = z.enum([
   "active",
   "interrupted",
   "completed",
+  "abandoned",
 ]);
 export type SessionStatus = z.infer<typeof SessionStatusSchema>;
 

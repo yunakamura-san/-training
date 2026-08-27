@@ -16,6 +16,8 @@ const START_ACTION = "thinktrain_start";
 const CONFIRM_ACTION = "thinktrain_confirm";
 const INTERRUPT_ACTION = "thinktrain_interrupt";
 const RESUME_ACTION = "thinktrain_resume";
+const ABANDON_ACTION = "thinktrain_abandon";
+const SKIP_ACTION = "thinktrain_skip";
 
 export interface SlackRuntime {
   app: App;
@@ -125,7 +127,11 @@ export function createSlackRuntime(
       try {
         const existing = await repository.getOpenSession(body.user.id);
         if (existing) {
-          await postEphemeral(client, config, "進行中または中断中の問題があります。");
+          await client.chat.postMessage({
+            channel: config.SLACK_CHANNEL_ID,
+            text: "前回のトレーニングが途中です。",
+            blocks: unfinishedSessionBlocks(),
+          });
           return;
         }
         const completedCount = await repository.countCompletedSessions(body.user.id);
@@ -197,7 +203,8 @@ export function createSlackRuntime(
     await queue.run(body.user.id, async () => {
       try {
         const session = await requireOpenSession(repository, body.user.id);
-        const resumed = transition(session, { type: "RESUME" });
+        const resumed =
+          session.status === "interrupted" ? transition(session, { type: "RESUME" }) : session;
         await repository.saveSession(resumed);
         await postCurrentStep(client, config, resumed);
       } catch (error) {
@@ -206,12 +213,46 @@ export function createSlackRuntime(
     });
   });
 
+  app.action(ABANDON_ACTION, async ({ ack, body, client }) => {
+    await ack();
+    if (!isAuthorized(body.user.id, config)) return;
+    await queue.run(body.user.id, async () => {
+      try {
+        const session = await requireOpenSession(repository, body.user.id);
+        await repository.saveSession(transition(session, { type: "ABANDON" }));
+        await client.chat.postMessage({
+          channel: config.SLACK_CHANNEL_ID,
+          text: "前回分を終了しました。今日の問題を開始できます。",
+          blocks: actionBlocks("準備ができたら始めましょう。", START_ACTION, "今日の問題を開始"),
+        });
+      } catch (error) {
+        await reportInteractionFailure(client, config, error);
+      }
+    });
+  });
+
+  app.action(SKIP_ACTION, async ({ ack, body, client }) => {
+    await ack();
+    if (!isAuthorized(body.user.id, config)) return;
+    const date = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Tokyo",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(new Date());
+    await repository.claimNotification(date, "reminder");
+    await client.chat.postMessage({
+      channel: config.SLACK_CHANNEL_ID,
+      text: "今日は休みにしました。再通知は送りません。",
+    });
+  });
+
   const messenger: SchedulerMessenger = {
     async sendQuestionPrompt() {
       await app.client.chat.postMessage({
         channel: config.SLACK_CHANNEL_ID,
         text: "今日の思考トレーニングを始めましょう。",
-        blocks: actionBlocks("今日の思考トレーニング", START_ACTION, "開始"),
+        blocks: dailyPromptBlocks(),
       });
     },
     async sendUnstartedReminder() {
@@ -325,6 +366,69 @@ function actionBlocks(text: string, actionId: string, label: string): KnownBlock
           action_id: actionId,
           text: { type: "plain_text", text: label },
           style: "primary",
+        },
+      ],
+    },
+  ];
+}
+
+function dailyPromptBlocks(): KnownBlock[] {
+  return [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "*今日の15分*\n構造化思考のトレーニングを始めましょう。",
+      },
+    },
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          action_id: START_ACTION,
+          text: { type: "plain_text", text: "開始する" },
+          style: "primary",
+        },
+        {
+          type: "button",
+          action_id: SKIP_ACTION,
+          text: { type: "plain_text", text: "今日は休む" },
+        },
+      ],
+    },
+  ];
+}
+
+function unfinishedSessionBlocks(): KnownBlock[] {
+  return [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: "*前回のトレーニングが途中です。*\n続きから再開するか、終了して今日の問題へ進めます。",
+      },
+    },
+    {
+      type: "actions",
+      elements: [
+        {
+          type: "button",
+          action_id: RESUME_ACTION,
+          text: { type: "plain_text", text: "続きから" },
+          style: "primary",
+        },
+        {
+          type: "button",
+          action_id: ABANDON_ACTION,
+          text: { type: "plain_text", text: "前回を終了" },
+          style: "danger",
+          confirm: {
+            title: { type: "plain_text", text: "前回分を終了しますか？" },
+            text: { type: "mrkdwn", text: "途中回答は履歴に残りますが、採点は行いません。" },
+            confirm: { type: "plain_text", text: "終了する" },
+            deny: { type: "plain_text", text: "戻る" },
+          },
         },
       ],
     },
