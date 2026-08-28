@@ -1,5 +1,3 @@
-BEGIN;
-
 CREATE TABLE IF NOT EXISTS schema_migrations (
   version text PRIMARY KEY,
   applied_at timestamptz NOT NULL DEFAULT now()
@@ -98,4 +96,3 @@ CREATE INDEX IF NOT EXISTS evaluations_created_idx
 CREATE INDEX IF NOT EXISTS difficulty_history_user_created_idx
   ON difficulty_history (user_id, created_at DESC);
 
-COMMIT;

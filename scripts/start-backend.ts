@@ -1,6 +1,6 @@
 import { DEMO_CASES } from "../src/core/templates";
 import { FallbackAiProvider, type AiProvider } from "../src/server/ai/provider";
-import { GeminiCliProvider } from "../src/server/ai/gemini-cli-provider";
+import { AntigravityProvider } from "../src/server/ai/antigravity-provider";
 import { MockAiProvider } from "../src/server/ai/mock-provider";
 import { OllamaProvider } from "../src/server/ai/ollama-provider";
 import { loadConfig, safeLog } from "../src/server/config";
@@ -20,7 +20,7 @@ async function main(): Promise<void> {
   }
 
   const providers: AiProvider[] = [
-    new GeminiCliProvider("gemini", config.AI_TIMEOUT_MS),
+    new AntigravityProvider(config.ANTIGRAVITY_EXECUTABLE, config.AI_TIMEOUT_MS),
     new OllamaProvider(config.OLLAMA_URL, config.OLLAMA_MODEL, config.AI_TIMEOUT_MS),
   ];
   if (config.ALLOW_MOCK_AI) providers.push(new MockAiProvider());

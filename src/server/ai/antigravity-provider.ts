@@ -9,11 +9,11 @@ import {
 
 const MAX_OUTPUT_BYTES = 200_000;
 
-export class GeminiCliProvider implements AiProvider {
-  readonly name = "gemini-cli";
+export class AntigravityProvider implements AiProvider {
+  readonly name = "antigravity-cli";
 
   constructor(
-    private readonly executable = "gemini",
+    private readonly executable = "agy",
     private readonly timeoutMs = 45_000,
   ) {
     if (!Number.isInteger(timeoutMs) || timeoutMs < 1_000) {
@@ -25,7 +25,15 @@ export class GeminiCliProvider implements AiProvider {
     const prompt = buildEvaluationPrompt(request);
     const output = await runProcess(
       this.executable,
-      ["--prompt", prompt, "--output-format", "text"],
+      [
+        "--prompt",
+        prompt,
+        "--output-format",
+        "text",
+        "--effort",
+        "low",
+        "--sandbox",
+      ],
       this.timeoutMs,
     );
     return { ...parseProviderResponse(output), provider: this.name };
@@ -38,7 +46,6 @@ function runProcess(
   timeoutMs: number,
 ): Promise<string> {
   return new Promise((resolve, reject) => {
-    // shell=false and an explicit argv array prevent prompt-based shell injection.
     const child = spawn(executable, [...args], {
       shell: false,
       stdio: ["ignore", "pipe", "pipe"],
@@ -60,24 +67,23 @@ function runProcess(
     };
     const timer = setTimeout(() => {
       child.kill("SIGKILL");
-      finish(new Error("Gemini CLI timed out"));
+      finish(new Error("Antigravity CLI timed out"));
     }, timeoutMs);
 
     child.stdout.on("data", (chunk: Buffer) => {
       bytes += chunk.length;
       if (bytes > MAX_OUTPUT_BYTES) {
         child.kill("SIGKILL");
-        finish(new Error("Gemini CLI output exceeded limit"));
+        finish(new Error("Antigravity CLI output exceeded limit"));
         return;
       }
       chunks.push(chunk);
     });
-    // Deliberately do not collect stderr: it may include prompt or credential details.
     child.stderr.resume();
     child.once("error", (error) => finish(error));
     child.once("close", (code) => {
       if (code !== 0) {
-        finish(new Error(`Gemini CLI exited with status ${code ?? "unknown"}`));
+        finish(new Error(`Antigravity CLI exited with status ${code ?? "unknown"}`));
         return;
       }
       finish(undefined, Buffer.concat(chunks).toString("utf8"));

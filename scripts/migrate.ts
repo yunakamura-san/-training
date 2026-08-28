@@ -23,11 +23,13 @@ async function main(): Promise<void> {
       `;
       if (applied.length > 0) continue;
       const migration = await readFile(resolve(directory, file), "utf8");
-      await sql.unsafe(migration);
-      await sql`
-        INSERT INTO schema_migrations (version) VALUES (${file})
-        ON CONFLICT DO NOTHING
-      `;
+      await sql.begin(async (transaction) => {
+        await transaction.unsafe(migration);
+        await transaction`
+          INSERT INTO schema_migrations (version) VALUES (${file})
+          ON CONFLICT DO NOTHING
+        `;
+      });
       console.log(`Applied migration ${file}`);
     }
   } finally {

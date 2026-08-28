@@ -58,7 +58,7 @@ Roughly 70% of the rubric is allocated to structure. Domain knowledge is not sco
 
 The evaluator is an adapter with this order:
 
-1. Gemini CLI in headless JSON mode
+1. Antigravity CLI in headless mode
 2. Ollama on localhost
 3. Deterministic demo evaluator
 
@@ -72,7 +72,7 @@ Only the current fictional case, current answers, and fixed rubric are sent to t
 - A native Node.js scheduler and worker
 - No Docker requirement
 
-Responses, evaluations, and statistics stay in local PostgreSQL. Slack retains messages according to the workspace policy. Gemini CLI sends the evaluation payload under the signed-in Google account, so organizational approval still applies.
+Responses, evaluations, and statistics stay in local PostgreSQL. Slack retains messages according to the workspace policy. Antigravity CLI sends the evaluation payload under the signed-in Google account, so organizational approval still applies.
 
 ## Dashboard
 

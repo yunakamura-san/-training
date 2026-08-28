@@ -15,6 +15,7 @@ const ConfigSchema = z.object({
   SLACK_CHANNEL_ID: z.string().regex(/^[CDG][A-Z0-9]+$/),
   OLLAMA_URL: z.string().url().default("http://127.0.0.1:11434"),
   OLLAMA_MODEL: z.string().min(1).max(100).default("gemma3"),
+  ANTIGRAVITY_EXECUTABLE: z.string().min(1).max(500).default("agy"),
   DASHBOARD_URL: z.string().url().default("http://127.0.0.1:43127"),
   ALLOW_MOCK_AI: z
     .enum(["true", "false"])

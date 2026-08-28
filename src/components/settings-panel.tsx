@@ -169,7 +169,7 @@ export function SettingsPanel() {
                 detail: "デモモード",
                 status: "未接続",
               },
-              { icon: Sparkles, label: "AIプロバイダー", detail: "Gemini CLI 優先", status: "未確認" },
+              { icon: Sparkles, label: "AIプロバイダー", detail: "Antigravity CLI 優先", status: "未確認" },
               { icon: ShieldCheck, label: "Slack Socket Mode", detail: "ローカル接続", status: "設定待ち" },
             ].map((connection) => {
               const Icon = connection.icon
@@ -194,7 +194,7 @@ export function SettingsPanel() {
             <CardTitle className="font-serif text-lg text-emerald-950">データはローカルに保存</CardTitle>
           </CardHeader>
           <CardContent className="text-sm leading-6 text-emerald-950/75">
-            回答・採点・履歴はMac上のPostgreSQLへ保存します。Gemini CLIを利用する場合、採点対象だけが会社契約のGeminiへ送信されます。
+            回答・採点・履歴はMac上のPostgreSQLへ保存します。Antigravity CLIを利用する場合、採点対象だけがGoogleのGeminiへ送信されます。
           </CardContent>
         </Card>
 

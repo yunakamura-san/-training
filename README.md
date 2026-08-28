@@ -16,7 +16,7 @@
 - Next.js 16 / React 19 / TypeScript
 - Slack Bolt / Socket Mode
 - PostgreSQL
-- Gemini CLI → Ollama の順でAI評価
+- Antigravity CLI → Ollama の順でAI評価
 - node-cron / date-holidays
 - Vitest
 
@@ -51,23 +51,19 @@ npm run db:migrate
 DATABASE_URL=postgresql://localhost:5432/thinktrain
 ```
 
-### 2. Gemini CLI
+### 2. Antigravity CLI
 
-会社アカウントでGemini CLIを利用できるか、機密情報を含まない入力で確認します。
+旧Gemini CLIの無料Tierは終了しているため、公式後継のAntigravity CLIを利用します。
 
 ```bash
-npm install -g @google/gemini-cli
-gemini
-gemini -p "1から3までの数字をJSON配列で返してください" --output-format json
+curl -fsSL https://antigravity.google/cli/install.sh | bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.zshrc
+source ~/.zshrc
+agy
+agy -p 'JSONだけで {"ok":true} と返してください' --output-format text
 ```
 
-会社アカウントではGoogle Cloudプロジェクトの指定を求められる場合があります。
-
-```dotenv
-GOOGLE_CLOUD_PROJECT=your-approved-project-id
-```
-
-Vertex AIの課金を勝手に有効化しないでください。Gemini CLIが利用できない場合、Botは`OLLAMA_URL`のOllamaを試します。どちらも利用できない場合は、偽のAI採点へ黙って切り替えずエラーを返します。
+Google OAuthでは会社アカウントを選び、信頼対象は`thinktrain`フォルダだけにしてください。Botは低推論負荷とサンドボックスを指定して`agy`を実行します。利用できない場合は`OLLAMA_URL`のOllamaを試し、どちらも失敗した場合は偽のAI採点へ黙って切り替えずエラーを返します。
 
 画面確認だけでデモ採点を許可する場合に限り、次を設定します。
 
@@ -145,7 +141,7 @@ npm run check
 
 - 架空ケースだけを使用し、顧客名・商談情報・社内数値は回答しない
 - `.env.local`、Slack Token、DB接続情報はGitへ追加しない
-- Gemini CLIの子プロセスにはSlack TokenとDB認証情報を渡さない
+- Antigravity CLIの子プロセスにはSlack TokenとDB認証情報を渡さない
 - AIへ送るのは当日の問題、当日の回答、固定評価基準だけ
 - Slackにはワークスペースの保持ポリシーが適用される
-- 会社アカウントでのGemini CLI自動利用は、社内ルールを別途確認する
+- 会社アカウントでのAntigravity CLI自動利用は、社内ルールを別途確認する
