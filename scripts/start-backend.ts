@@ -35,6 +35,10 @@ async function main(): Promise<void> {
   await runtime.app.start();
   scheduler.start();
   safeLog("info", "Thinktrain backend started");
+  if (process.argv.includes("--send-now")) {
+    await runtime.messenger.sendQuestionPrompt();
+    safeLog("info", "Sent a manual Slack test prompt");
+  }
 
   let stopping = false;
   const stop = async (signal: string) => {
