@@ -107,11 +107,6 @@ export function createSlackRuntime(
         if (!session || session.status !== "active") return;
         const next = transition(session, { type: "APPEND", text: event.text! });
         await repository.saveSession(next);
-        await client.reactions.add({
-          channel: config.SLACK_CHANNEL_ID,
-          timestamp: (message as { ts: string }).ts,
-          name: "memo",
-        });
       } catch (error) {
         safeLog("error", "Failed to store Slack message", {
           errorType: error instanceof Error ? error.name : "unknown",
