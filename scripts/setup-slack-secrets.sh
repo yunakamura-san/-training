@@ -20,8 +20,16 @@ read -r -p "Member ID (U...): " SLACK_USER_ID
   echo "Bot Tokenはxoxb-から始まる値を入力してください。" >&2
   exit 1
 }
+[[ ${#SLACK_BOT_TOKEN} -le 200 && "$SLACK_BOT_TOKEN" != *[[:space:]]* ]] || {
+  echo "Bot Tokenが長すぎるか、余分な空白を含んでいます。CopyボタンでTokenだけをコピーしてください。" >&2
+  exit 1
+}
 [[ "$SLACK_APP_TOKEN" == xapp-* ]] || {
   echo "App Tokenはxapp-から始まる値を入力してください。" >&2
+  exit 1
+}
+[[ ${#SLACK_APP_TOKEN} -le 200 && "$SLACK_APP_TOKEN" != *[[:space:]]* ]] || {
+  echo "App Tokenが長すぎるか、余分な空白を含んでいます。" >&2
   exit 1
 }
 [[ ${#SLACK_SIGNING_SECRET} -ge 16 ]] || {
@@ -53,8 +61,9 @@ result = []
 for line in lines:
     key = line.split("=", 1)[0] if "=" in line else ""
     if key in updates:
-        result.append(f"{key}={updates[key]}")
-        seen.add(key)
+        if key not in seen:
+            result.append(f"{key}={updates[key]}")
+            seen.add(key)
     else:
         result.append(line)
 for key, value in updates.items():
