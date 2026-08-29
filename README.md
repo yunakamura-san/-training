@@ -51,6 +51,12 @@ npm run db:migrate
 DATABASE_URL=postgresql://localhost:5432/thinktrain
 ```
 
+接続テストの回答だけを消して開始状態へ戻す場合は、問題ケースを残したまま進捗を初期化できます。
+
+```bash
+npm run db:reset-progress
+```
+
 ### 2. Antigravity CLI
 
 旧Gemini CLIの無料Tierは終了しているため、公式後継のAntigravity CLIを利用します。

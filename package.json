@@ -12,6 +12,7 @@
     "local": "concurrently --kill-others-on-fail \"npm run start\" \"npm run worker\"",
     "db:create": "tsx --env-file=.env.local scripts/create-database.ts",
     "db:migrate": "tsx --env-file=.env.local scripts/migrate.ts",
+    "db:reset-progress": "tsx --env-file=.env.local scripts/reset-progress.ts --confirm",
     "slack:setup-secrets": "bash scripts/setup-slack-secrets.sh",
     "slack:setup-dm": "tsx --env-file=.env.local scripts/setup-slack-dm.ts",
     "slack:setup": "npm run slack:setup-secrets && npm run slack:setup-dm",
