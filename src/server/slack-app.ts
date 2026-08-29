@@ -336,7 +336,24 @@ async function postCurrentStep(
     channel: config.SLACK_CHANNEL_ID,
     text: `${step.title}: ${step.instruction}`,
     blocks: [
-      { type: "section", text: { type: "mrkdwn", text: `*${step.title}*\n${step.instruction}` } },
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: [
+            `*${step.title}*`,
+            step.instruction,
+            "",
+            "*回答の型*",
+            `\`\`\`${step.answerFormat}\`\`\``,
+            "*書き方の例（別テーマ）*",
+            step.example
+              .split("\n")
+              .map((line) => `> ${line}`)
+              .join("\n"),
+          ].join("\n"),
+        },
+      },
       {
         type: "actions",
         elements: [

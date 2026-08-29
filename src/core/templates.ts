@@ -4,43 +4,70 @@ export interface StepTemplate {
   key: StepKey;
   title: string;
   instruction: string;
+  answerFormat: string;
+  example: string;
 }
 
 export const STEP_TEMPLATES: readonly StepTemplate[] = [
   {
     key: "facts_and_interpretations",
     title: "1. 事実と解釈",
-    instruction: "観測できる事実と、そこからの解釈・仮説を分けてください。",
+    instruction:
+      "問題文に書かれている事実と、そこからあなたが考えた仮説を分けてください。事実を2〜4個、解釈を1〜3個書けば十分です。",
+    answerFormat: "事実：①… ②…\n解釈・仮説：①… ②…",
+    example:
+      "事実：来店数は前年と同じ／売上は10%減少\n解釈・仮説：客単価が下がった可能性がある",
   },
   {
     key: "question_definition",
     title: "2. 問い定義",
-    instruction: "今回答えるべき問いを、判断可能な一文で定義してください。",
+    instruction:
+      "このケースで最後に答えるべきことを、一文の質問にしてください。「分析する」だけで終わらず、何を判断するかまで書きます。",
+    answerFormat: "問い：〇〇の原因を特定し、△△を決めるにはどうすべきか？",
+    example: "問い：売上低下の主因を特定し、最初に打つ施策を決めるにはどうすべきか？",
   },
   {
     key: "decomposition_axis",
     title: "3. 分解軸",
-    instruction: "問いを分解する軸と、その軸を選んだ理由を示してください。",
+    instruction:
+      "原因や選択肢を、どんな基準で切り分けるか決めてください。時間・プロセス・主体などから、まず一つの軸を選びます。",
+    answerFormat: "分解軸：〇〇\n選んだ理由：〇〇",
+    example: "分解軸：購買プロセス（認知→来店→購入）\n理由：売上が落ちる場所を順番に特定できるため",
   },
   {
     key: "major_items",
     title: "4. 大項目",
-    instruction: "分解軸に沿った大項目を、重複と漏れを意識して列挙してください。",
+    instruction:
+      "先ほど決めた分解軸に沿って、同じ粒度の大項目を3〜5個並べてください。この段階では細かく説明しなくて構いません。",
+    answerFormat: "大項目：①… ②… ③…",
+    example: "大項目：①認知 ②来店 ③購入 ④再購入",
   },
   {
     key: "deep_dive",
     title: "5. 深掘り",
-    instruction: "重要な大項目を根拠・因果・反証可能性まで掘り下げてください。",
+    instruction:
+      "最も重要そうな大項目を一つ選び、さらに2〜4個の要因へ分けてください。なぜ結果につながるかも一言添えます。",
+    answerFormat: "深掘りする項目：〇〇\n要因：①… ②…\nつながり：〇〇だから△△になる",
+    example:
+      "深掘りする項目：購入\n要因：①価格 ②品揃え ③接客\nつながり：価格への納得感が下がると購入率が下がる",
   },
   {
     key: "self_check",
     title: "6. 自己点検",
-    instruction: "前提、飛躍、見落とし、反対意見を厳しく点検してください。",
+    instruction:
+      "ここまでの構造を見直します。①重複 ②抜け ③粒度のばらつき、の3点を確認し、必要なら修正してください。",
+    answerFormat: "重複：なし／〇〇\n抜け：なし／〇〇を追加\n粒度：揃っている／〇〇を修正",
+    example: "重複：なし\n抜け：競合店の影響を追加\n粒度：『接客態度』を上位の『接客』へ修正",
   },
   {
     key: "priority_validation_conclusion",
     title: "7. 優先順位・検証・結論",
-    instruction: "優先順位、検証方法、現時点の結論をまとめてください。",
+    instruction:
+      "最初に確認する仮説を最大2つ選びます。影響の大きさと確かめやすさを理由にし、確認方法と現時点の結論を書いてください。",
+    answerFormat:
+      "優先①：仮説／理由／確認方法\n優先②：仮説／理由／確認方法\n結論：現時点では〇〇と考える",
+    example:
+      "優先①：客単価低下／影響が大きい／購買データを前年比較\n結論：まず価格と購入点数の変化を確認する",
   },
 ] as const;
 
