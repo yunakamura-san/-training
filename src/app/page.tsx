@@ -37,7 +37,7 @@ export default async function Home() {
       score,
     })) ?? skills
   const recentSessions =
-    snapshot && snapshot.sessions.length > 0
+    snapshot
       ? snapshot.sessions.slice(0, 4).map(({ session, trainingCase, evaluation }) => ({
           id: session.id,
           date: new Intl.DateTimeFormat("ja-JP", {
@@ -53,11 +53,12 @@ export default async function Home() {
           focus: "構造化",
         }))
       : sessions
-  const ability = snapshot?.difficulty?.ability ?? 64
-  const difficulty = snapshot?.difficulty?.current ?? 52
-  const latestScore = latestEvaluation?.overallScore ?? 78
+  const connectedWithoutData = snapshot !== null && snapshot.sessions.length === 0
+  const ability = snapshot ? (snapshot.difficulty?.ability ?? 50) : 64
+  const difficulty = snapshot ? (snapshot.difficulty?.current ?? 50) : 52
+  const latestScore = connectedWithoutData ? 0 : (latestEvaluation?.overallScore ?? 78)
   const latestTitle = latest?.trainingCase.title ?? "新規商談の受注率低下"
-  const latestLink = latest?.session.id ?? "sales-win-rate"
+  const latestLink = connectedWithoutData ? "/settings" : `/history/${latest?.session.id ?? "sales-win-rate"}`
   const latestStrength =
     latestEvaluation?.strength ??
     "営業工程の分解は明確でした。次は、同じ階層で使う分類軸をひとつに揃えましょう。"
@@ -87,27 +88,33 @@ export default async function Home() {
             <div className="absolute -right-6 -top-10 size-44 rounded-full border border-white/10" />
             <div className="relative">
               <div className="flex flex-wrap items-center gap-2">
-                <Badge className="border-white/15 bg-white/10 text-white">本日のトレーニング完了</Badge>
-                <span className="text-xs text-white/65">12分40秒</span>
+                <Badge className="border-white/15 bg-white/10 text-white">
+                  {connectedWithoutData ? "初回診断の準備完了" : "本日のトレーニング完了"}
+                </Badge>
+                {!connectedWithoutData && <span className="text-xs text-white/65">12分40秒</span>}
               </div>
               <h2 className="mt-5 max-w-xl font-serif text-2xl font-semibold leading-tight sm:text-3xl">
-                {latestTitle}を
-                <br className="hidden sm:block" />
-                構造化しました
+                {connectedWithoutData ? (
+                  <>最初のトレーニングを<br className="hidden sm:block" />待っています</>
+                ) : (
+                  <>{latestTitle}を<br className="hidden sm:block" />構造化しました</>
+                )}
               </h2>
               <p className="mt-3 max-w-lg text-sm leading-6 text-white/70">
-                {latestStrength}
+                {connectedWithoutData
+                  ? "平日9:00にSlackへ初回診断を送ります。回答後、ここに能力プロフィールが表示されます。"
+                  : latestStrength}
               </p>
               <Link
-                href={`/history/${latestLink}`}
+                href={latestLink}
                 className="mt-6 inline-flex items-center gap-2 rounded-lg bg-white px-4 py-2.5 text-sm font-semibold text-primary transition-transform hover:-translate-y-0.5"
               >
-                詳細なフィードバック
+                {connectedWithoutData ? "設定を確認" : "詳細なフィードバック"}
                 <ArrowUpRight className="size-4" />
               </Link>
             </div>
             <div className="relative flex items-center justify-center">
-              <ScoreRing value={latestScore} label="TODAY" />
+              <ScoreRing value={latestScore} label={connectedWithoutData ? "START" : "TODAY"} />
             </div>
           </CardContent>
         </Card>
@@ -234,13 +241,22 @@ export default async function Home() {
               </Card>
             </Link>
           ))}
+          {recentSessions.length === 0 && (
+            <Card className="border-dashed bg-transparent sm:col-span-2 xl:col-span-4">
+              <CardContent className="p-8 text-center text-sm text-muted-foreground">
+                初回トレーニングの完了後、ここに履歴が表示されます。
+              </CardContent>
+            </Card>
+          )}
         </div>
       </section>
 
-      <div className="flex items-center justify-center gap-2 py-2 text-xs text-muted-foreground">
-        <Sparkles className="size-3.5" />
-        デモデータを表示中。PostgreSQL接続後に実データへ切り替わります。
-      </div>
+      {snapshot === null && (
+        <div className="flex items-center justify-center gap-2 py-2 text-xs text-muted-foreground">
+          <Sparkles className="size-3.5" />
+          デモデータを表示中。PostgreSQL接続後に実データへ切り替わります。
+        </div>
+      )}
     </div>
   )
 }

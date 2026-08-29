@@ -17,7 +17,7 @@ export const dynamic = "force-dynamic"
 export default async function HistoryPage() {
   const snapshot = await loadDashboardSnapshot()
   const displayedSessions =
-    snapshot && snapshot.sessions.length > 0
+    snapshot
       ? snapshot.sessions.map(({ session, trainingCase, evaluation }) => ({
           id: session.id,
           date: new Intl.DateTimeFormat("ja-JP", {
@@ -85,6 +85,16 @@ export default async function HistoryPage() {
             </Card>
           </Link>
         ))}
+        {displayedSessions.length === 0 && (
+          <Card className="border-dashed bg-transparent">
+            <CardContent className="p-10 text-center">
+              <p className="font-semibold">まだトレーニング履歴がありません</p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Slackで初回診断を完了すると、回答と評価がここに表示されます。
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </section>
 
       <div className="flex items-center justify-center py-5 text-sm text-muted-foreground">

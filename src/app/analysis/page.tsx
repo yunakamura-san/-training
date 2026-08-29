@@ -21,17 +21,20 @@ export default async function AnalysisPage() {
     .map(({ evaluation }) => evaluation)
     .filter((evaluation) => evaluation !== null)
     .slice(0, 30)
+  const hasRealData = Boolean(recentEvaluations && recentEvaluations.length > 0)
   const averageScore =
-    recentEvaluations && recentEvaluations.length > 0
-      ? recentEvaluations.reduce((sum, item) => sum + item.overallScore, 0) /
-        recentEvaluations.length
-      : 75.8
+    hasRealData
+      ? recentEvaluations!.reduce((sum, item) => sum + item.overallScore, 0) /
+        recentEvaluations!.length
+      : snapshot
+        ? 0
+        : 75.8
   const displayedCategories =
-    recentEvaluations && recentEvaluations.length > 0
+    hasRealData
       ? evaluationCategories.map((category) => {
-          const currentWindow = recentEvaluations.slice(0, 7)
-          const previousWindow = recentEvaluations.slice(7, 14)
-          const average = (items: typeof recentEvaluations) =>
+          const currentWindow = recentEvaluations!.slice(0, 7)
+          const previousWindow = recentEvaluations!.slice(7, 14)
+          const average = (items: NonNullable<typeof recentEvaluations>) =>
             items.length === 0
               ? 0
               : items.reduce(
@@ -48,9 +51,15 @@ export default async function AnalysisPage() {
             ),
           }
         })
-      : categoryHistory
+      : snapshot
+        ? evaluationCategories.map((category) => ({
+            category: evaluationCategoryLabels[category],
+            current: 0,
+            previous: 0,
+          }))
+        : categoryHistory
   const trendData =
-    snapshot && snapshot.difficultyHistory.length > 0
+    snapshot
       ? snapshot.difficultyHistory
           .slice(0, 8)
           .reverse()
@@ -83,7 +92,7 @@ export default async function AnalysisPage() {
           { label: "能力値", value: String(ability), note: "直近5回で平滑化", icon: Brain, tone: "text-primary" },
           { label: "平均スコア", value: averageScore.toFixed(1), note: "直近30回", icon: Trophy, tone: "text-amber-700" },
           { label: "現在難易度", value: String(difficulty), note: "日次変動は最大8", icon: Gauge, tone: "text-sky-700" },
-          { label: "改善点再発率", value: "31%", note: "前月比 -8pt", icon: Repeat2, tone: "text-emerald-700" },
+          { label: "改善点再発率", value: snapshot && !hasRealData ? "—" : "31%", note: hasRealData ? "直近30回" : "データ蓄積後に表示", icon: Repeat2, tone: "text-emerald-700" },
         ].map((metric) => {
           const Icon = metric.icon
           return (
@@ -155,7 +164,7 @@ export default async function AnalysisPage() {
             <CardDescription>同じ指摘を減らせているか</CardDescription>
           </CardHeader>
           <CardContent className="space-y-5">
-            {recurringFindings.map((finding, index) => (
+            {(snapshot && !hasRealData ? [] : recurringFindings).map((finding, index) => (
               <div key={finding.category} className="rounded-2xl border p-4">
                 <div className="flex items-center justify-between">
                   <p className="font-semibold">{finding.category}</p>
@@ -164,6 +173,11 @@ export default async function AnalysisPage() {
                 <p className="mt-2 text-xs leading-5 text-muted-foreground">{finding.description}</p>
               </div>
             ))}
+            {snapshot && !hasRealData && (
+              <div className="rounded-2xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+                初回トレーニング後に改善カテゴリを表示します。
+              </div>
+            )}
             <div className="rounded-2xl bg-primary/5 p-4">
               <p className="text-sm font-semibold text-primary">次のベンチマークまで</p>
               <div className="mt-3 flex items-center gap-3">
